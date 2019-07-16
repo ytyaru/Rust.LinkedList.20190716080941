@@ -44,7 +44,7 @@ impl<T> LinkedList<T> {
         fn node_of_index<T>(node: &mut Option<Box<Node<T>>>, index: u32, count: u32) -> &mut Option<Box<Node<T>>> {
             if index == count { node }
             else {
-                if let None = node { panic!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1) }
+                if let None = node { panic!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count) }
                 else { node_of_index(&mut node.as_mut().unwrap().next, index, count+1) }
             }
         }
@@ -186,6 +186,12 @@ mod tests {
             , prev: None
             }))
         );
+    }
+    #[test]
+    #[should_panic(expected = "Out of index. index値が大きすぎます。index: 1, 許容範囲: 0...0")]
+    fn LikedList_push_from_index_out_of_index() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push_from_index(0, 1);
     }
     #[test]
     fn LikedList_push_from_index_3_head() {
