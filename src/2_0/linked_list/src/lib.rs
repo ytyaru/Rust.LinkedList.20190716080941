@@ -33,103 +33,59 @@ impl<T> LinkedList<T> {
         // 3. 新しい末尾ノードポインタの値として生成した新ノードを代入する
         *last = Some(Box::new(Node::new(item)));
     }
+    /*
     pub fn push_from_index(&mut self, item: T, index: u32) {
+        if let None = self.head { self.push_head(item); return; }
+        let result = self.search_from_index_ptr(index);
         let result = self.search_from_index(index);
         match result {
-//            Some(ptr) => {
             Some(ref mut ptr) => {
                 let mut new_node = Some(Box::new(Node::new(item)));
-//                let old_idx_node = std::mem::replace(ptr, new_node);
-//                let old_idx_node = std::mem::replace(ptr, None);
                 let old_idx_node = std::mem::replace(result, None);
                 std::mem::replace(&mut new_node.as_mut().unwrap().next, old_idx_node);
                 std::mem::replace(result, new_node);
-//                std::mem::replace(ptr, new_node);
             },
             _ => panic!("Out of index."),
         }
-        /*
-        match result {
-            Err(e) => panic!(e),
-//            Ok(ref mut ptr) => {
-            Ok(ptr) => {
-                /*
-                let mut new_node = Some(Box::new(Node::new(item)));
-//                let new_node = Some(Box::new(new_node));
-//                let new_node = Node::new(item);
-//                let old_idx_node = std::mem::replace(&mut ptr, Some(Box::new(new_node)));
-//                let old_idx_node = std::mem::replace(*ptr, Some(Box::new(new_node)));
-//                let old_idx_node = std::mem::replace(*ptr, new_node);
-//                let old_idx_node = std::mem::replace(&mut ptr, new_node);
-                let old_idx_node = std::mem::replace(ptr, new_node);
-//                std::mem::replace(&mut new_node.as_mut().unwrap().next, old_idx_node);
-                std::mem::replace(&mut new_node.as_mut().unwrap().next, old_idx_node);
-                */
-                let mut new_node = Some(Box::new(Node::new(item)));
-//                let old_idx_node = std::mem::replace(ptr, new_node);
-                let old_idx_node = std::mem::replace(ptr, None);
-                std::mem::replace(&mut new_node.as_mut().unwrap().next, old_idx_node);
-                std::mem::replace(ptr, new_node);
-            },
-        }
-        */
-        /*
-        let &mut target = self.head;
-        let count = 0;
-        while if Some(ref mut node) = *target {
-            if count < index {
-                target = &mut target.as_mut().unwrap().next;
-                count++;
-                continue;
-            } else {
-                
-                break;
-            }
-        }
-        if count < index { panic!("index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1); }
-        */
-        /*
-        while count < index {
-            target 
-            count++;
-        }
-        */
     }
+    */
+    pub fn push_from_index(&mut self, item: T, index: u32) {
+        if let None = self.head { self.push_head(item); return; }
+        let index_ptr = self.search_from_index_ptr(index);
+        let mut new_node = Some(Box::new(Node::new(item)));
+        let old_idx_node = std::mem::replace(index_ptr, None);
+        std::mem::replace(&mut new_node.as_mut().unwrap().next, old_idx_node);
+        std::mem::replace(index_ptr, new_node);
+    }
+    fn search_from_index_ptr(&mut self, index: u32) -> &mut Option<Box<Node<T>>> {
+        fn node_of_index<T>(node: &mut Option<Box<Node<T>>>, index: u32, count: u32) -> &mut Option<Box<Node<T>>> {
+            if index == count { node }
+            else {
+//                if let None = node { panic!(format!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1).as_str()) }
+                if let None = node { panic!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1) }
+                else { node_of_index(&mut node.as_mut().unwrap().next, index, count+1) }
+            }
+            /*
+            match node {
+                Some(ref mut _n) if index <= count => { node },
+                Some(ref mut _n) => node_of_index(&mut node.as_mut().unwrap().next, index, count+1),
+                _ => { node }
+            }
+            */
+        }
+        node_of_index(&mut self.head, index, 0)
+    }
+    /*
+    // indexの位置がhead=None, next=Noneのときパニクってしまう
     fn search_from_index(&mut self, index: u32) -> &mut Option<Box<Node<T>>> {
-//    fn search_from_index(&self, index: u32) -> Result<&mut Option<Box<Node<T>>>, &'static str> {
         fn node_of_index<T>(node: &mut Option<Box<Node<T>>>, index: u32, count: u32) -> &mut Option<Box<Node<T>>> {
             match node {
                 Some(ref mut _n) if index <= count => { node },
                 Some(ref mut _n) => node_of_index(&mut node.as_mut().unwrap().next, index, count+1),
                 _ => { node }
-//                _ => { Err(format!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1).as_str()) }
             }
         }
         node_of_index(&mut self.head, index, 0)
-    }
-    /*
-    fn search_from_index(&self, index: u32) -> Result<&mut Option<Box<Node<T>>>, &'static str> {
-//        let &mut target = self.head;
-//        let target = &mut self.head;
-//        let target: &mut std::option::Option<std::boxed::Box<Node<T>>> = self.head;
-//        let &mut target: &mut std::option::Option<std::boxed::Box<Node<T>>> = self.head;
-        let &mut target: &mut std::option::Option<std::boxed::Box<Node<T>>> = &mut self.head;
-        let count = 0;
-//        while let Some(ref mut node) = *target {
-        while let Some(ref mut node) = target {
-            if count < index {
-                target = &mut target.as_mut().unwrap().next;
-                count += 1;
-                continue;
-//            } else { Ok(target) }
-            } else { return Ok(target); }
-        }
-        Err(format!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1).as_str())
-//        Err(format!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1)[..])
-//        Err(format!("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1))
-//        Err("Out of index. index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1)
-//        if count < index { panic!("index値が大きすぎます。index: {}, 許容範囲: 0...{}", index, count-1); }
-//        Err("Out of index.")
     }
     */
     pub fn remove(&mut self) { self.remove_tail(); }
@@ -269,6 +225,54 @@ mod tests {
             }))
         );
     }
+    #[test]
+    fn LikedList_push_from_index_3_head() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push_from_index(0, 0);
+        assert_eq!(list.head, Some(Box::new(Node { item: 0, next: None, prev: None })));
+        list.push_from_index(1, 0);
+        assert_eq!(list.head, 
+            Some(Box::new(Node { item: 1, next: 
+                Some(Box::new(Node { item: 0, next: None, prev: None }))
+            , prev: None
+            }))
+        );
+        list.push_from_index(2, 0);
+        assert_eq!(list.head, 
+            Some(Box::new(Node { item: 2, next: 
+                Some(Box::new(Node { item: 1, next: 
+                    Some(Box::new(Node { item:0, next: None, prev: None }))
+                , prev: None
+                }))
+            , prev: None
+            }))
+        );
+    }
+    #[test]
+    fn LikedList_push_from_index_3_tail() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push_from_index(0, 0);
+        assert_eq!(list.head, Some(Box::new(Node { item: 0, next: None, prev: None })));
+        list.push_from_index(1, 1);
+        assert_eq!(list.head, 
+            Some(Box::new(Node { item: 0, next: 
+                Some(Box::new(Node { item: 1, next: None, prev: None }))
+            , prev: None
+            }))
+        );
+        list.push_from_index(2, 2);
+        assert_eq!(list.head, 
+            Some(Box::new(Node { item: 0, next: 
+                Some(Box::new(Node { item: 1, next: 
+                    Some(Box::new(Node { item:2, next: None, prev: None }))
+                , prev: None
+                }))
+            , prev: None
+            }))
+        );
+    }
+
+
     #[test]
     fn LinkedList_new_string() {
         let list: LinkedList<String> = LinkedList::new();
