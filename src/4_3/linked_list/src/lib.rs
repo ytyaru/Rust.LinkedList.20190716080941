@@ -108,40 +108,20 @@ impl<T> LinkedList<T> {
         reverse_drop(&mut self.head);
     }
     pub fn get(&mut self, index: u32) -> &mut T { return &mut self.head.as_mut().unwrap().item; }
-//    pub fn next(&mut self) -> &mut T { return &mut self.head.as_mut().unwrap().item; }
 }
-//use std::iter::Iterator;
 impl<T> std::iter::Iterator for LinkedList<T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
-        println!("neeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeext");
         let mut first = std::mem::replace(&mut self.head, None);
-//        if first.is_none() { println!("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONE"); None }
-        if first.is_none() { println!("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONE"); return None; }
+        if first.is_none() { return None; }
         else {
-            println!("SOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOME");
-            // 2番目ノードが存在するなら
+            // 2番目ノードが存在するならそれを先頭にセット
             if first.as_mut().unwrap().next.is_some() {
                 let second = std::mem::replace(&mut first.as_mut().unwrap().next, None);
                 std::mem::replace(&mut self.head, second);
             }
             Some(first.unwrap().item)
         }
-
-        /*
-        if self.head.is_none() { None }
-        else {
-            // 先頭ノードを返す
-            let mut target = std::mem::replace(&mut self.head, None);
-            // 2番目ノードが存在するなら
-//            if let Some(ref mut _s) = target.as_mut().unwrap().next.is_some() {
-            if target.as_mut().unwrap().next.is_some() {
-                let second = std::mem::replace(&mut target.as_mut().unwrap().next, None);
-                std::mem::replace(&mut self.head, second);
-            }
-            Some(target.unwrap().item)
-        }
-        */
     }
 }
 #[cfg(test)]
@@ -558,30 +538,39 @@ mod tests {
     #[test]
     fn LinkedList_next() {
         let mut list: LinkedList<i32> = LinkedList::new();
-//        assert!(list.next().is_none());
-        println!("---------------------");
         let a = list.next();
-        println!("---------------------a: {:?}", a);
-        /*
-        assert_eq!(*list.next(), None);
+        assert_eq!(list.next(), None);
 
         list.push(0);
-        assert_eq!(list.next(), Some(Box::new(Node { item: 2, next: None, prev: None  })));
+        assert_eq!(list.next(), Some(0));
         assert_eq!(list.next(), None);
 
         list.push(0);
         list.push(1);
-        assert_eq!(list.next(), Some(Box::new(Node { item: 0, next: None, prev: None  })));
-        assert_eq!(list.next(), Some(Box::new(Node { item: 1, next: None, prev: None  })));
+        assert_eq!(list.next(), Some(0));
+        assert_eq!(list.next(), Some(1));
         assert_eq!(list.next(), None);
 
         list.push(0);
         list.push(1);
         list.push(2);
-        assert_eq!(list.next(), Some(Box::new(Node { item: 0, next: None, prev: None  })));
-        assert_eq!(list.next(), Some(Box::new(Node { item: 1, next: None, prev: None  })));
-        assert_eq!(list.next(), Some(Box::new(Node { item: 2, next: None, prev: None  })));
+        assert_eq!(list.next(), Some(0));
+        assert_eq!(list.next(), Some(1));
+        assert_eq!(list.next(), Some(2));
         assert_eq!(list.next(), None);
-        */
+
+        list.push(0);
+        list.push(1);
+        list.push(2);
+        let expecteds = vec![0,1,2];
+        for expected in expecteds.iter() {
+            assert_eq!(list.next(), Some(*expected));
+        }
+        list.push(0);
+        list.push(1);
+        list.push(2);
+        for (i, value) in expecteds.iter().enumerate() {
+            assert_eq!(list.next(), Some(expecteds[i]));
+        }
     }
 }
