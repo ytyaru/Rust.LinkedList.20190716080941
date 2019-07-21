@@ -110,25 +110,14 @@ impl<T> LinkedList<T> {
     pub fn get(&mut self, index: u32) -> &mut T { return &mut self.head.as_mut().unwrap().item; }
     /// 指定位置の参照を得る
     fn nth_ref(&self, index: usize) -> &T {
-        fn get_idx_ptr<T>(ptr: &Option<Box<Node<T>>>, index: usize, count: usize) -> &Option<Box<Node<T>>> {
+        fn get_ptr_from_idx<T>(ptr: &Option<Box<Node<T>>>, index: usize, count: usize) -> &Option<Box<Node<T>>> {
             if count < index {
-                if ptr.is_some() { return get_idx_ptr(&ptr.as_ref().unwrap().next, index, count+1); }
+                if ptr.is_some() { return get_ptr_from_idx(&ptr.as_ref().unwrap().next, index, count+1); }
                 else { return ptr; }
             } else { return ptr; }
         }
-//        let ptr = get_idx_ptr(&self.head, index, 0);
-//        if ptr.is_none() { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        else { &((*ptr).as_ref().unwrap().item) }
-
-        if let Some(ref _n) = get_idx_ptr(&self.head, index, 0) { return &(_n.item) }
+        if let Some(ref _n) = get_ptr_from_idx(&self.head, index, 0) { return &(_n.item) }
         else { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        if let Some(ref _n) = get_idx_ptr(&self.head, index, 0) {
-//            return &(_n.item)
-//        } else { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        let ptr = get_idx_ptr(&self.head, index, 0);
-//        if ptr.is_none() { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        else { &((*ptr).as_ref().unwrap().item) }
-
     }
 }
 impl<T> std::iter::Iterator for LinkedList<T> {

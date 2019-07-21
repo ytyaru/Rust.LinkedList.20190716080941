@@ -108,27 +108,27 @@ impl<T> LinkedList<T> {
         reverse_drop(&mut self.head);
     }
     pub fn get(&mut self, index: u32) -> &mut T { return &mut self.head.as_mut().unwrap().item; }
-    /// 指定位置の参照を得る
+    /// 指定位置の不変参照を得る
     fn nth_ref(&self, index: usize) -> &T {
-        fn get_idx_ptr<T>(ptr: &Option<Box<Node<T>>>, index: usize, count: usize) -> &Option<Box<Node<T>>> {
+        fn get_ptr_from_idx<T>(ptr: &Option<Box<Node<T>>>, index: usize, count: usize) -> &Option<Box<Node<T>>> {
             if count < index {
-                if ptr.is_some() { return get_idx_ptr(&ptr.as_ref().unwrap().next, index, count+1); }
+                if ptr.is_some() { return get_ptr_from_idx(&ptr.as_ref().unwrap().next, index, count+1); }
                 else { return ptr; }
             } else { return ptr; }
         }
-//        let ptr = get_idx_ptr(&self.head, index, 0);
-//        if ptr.is_none() { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        else { &((*ptr).as_ref().unwrap().item) }
-
-        if let Some(ref _n) = get_idx_ptr(&self.head, index, 0) { return &(_n.item) }
+        if let Some(ref _n) = get_ptr_from_idx(&self.head, index, 0) { return &(_n.item) }
         else { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        if let Some(ref _n) = get_idx_ptr(&self.head, index, 0) {
-//            return &(_n.item)
-//        } else { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        let ptr = get_idx_ptr(&self.head, index, 0);
-//        if ptr.is_none() { panic!("Out of index. index値が大きすぎます。index: {}", index); }
-//        else { &((*ptr).as_ref().unwrap().item) }
-
+    }
+    /// 指定位置の可変参照を得る
+    fn nth_mut(&mut self, index: usize) -> &mut T {
+        fn get_ptr_from_idx<T>(ptr: &mut Option<Box<Node<T>>>, index: usize, count: usize) -> &mut Option<Box<Node<T>>> {
+            if count < index {
+                if ptr.is_some() { return get_ptr_from_idx(&mut ptr.as_mut().unwrap().next, index, count+1); }
+                else { return ptr; }
+            } else { return ptr; }
+        }
+        if let Some(ref mut _n) = get_ptr_from_idx(&mut self.head, index, 0) { return &mut (_n.item) }
+        else { panic!("Out of index. index値が大きすぎます。index: {}", index); }
     }
 }
 impl<T> std::iter::Iterator for LinkedList<T> {
@@ -675,4 +675,46 @@ mod tests {
         *list.nth_ref(0) = 11; // error[E0594]: cannot assign to data in a `&` reference
     }
     */
+    #[test]
+    #[should_panic(expected = "Out of index. index値が大きすぎます。index: 0")]
+    fn LinkedList_nth_mut_out_of_index_0() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.nth_mut(0);
+    }
+    #[test]
+    #[should_panic(expected = "Out of index. index値が大きすぎます。index: 1")]
+    fn LinkedList_nth_mut_out_of_index_1() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push(0);
+        list.nth_mut(1);
+    }
+    #[test]
+    fn LinkedList_nth_mut_1() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push(10);
+        assert_eq!(*list.nth_mut(0), 10);
+    }
+    #[test]
+    fn LinkedList_nth_mut_3() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push(10);
+        list.push(11);
+        list.push(12);
+        let expecteds = vec![10, 11, 12];
+        for (i, expected) in expecteds.iter().enumerate() {
+            assert_eq!(*(list.nth_mut(i)), *expected);
+        }
+        for (i, expected) in expecteds.iter().enumerate() {
+            assert_eq!(*(list.nth_mut(i)), *expected);
+        }
+    }
+    #[test]
+    fn LinkedList_nth_mut_1_mutable() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push(10);
+        assert_eq!(*(list.nth_mut(0)), 10);
+        *list.nth_mut(0) = 11;
+        assert_eq!(*(list.nth_mut(0)), 11);
+    }
+
 }
